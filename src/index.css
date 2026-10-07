@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Colors */
+    --base-bg: #03040b;       /* deep navy / near-black */
+    --surface: #0a0c16;       /* slightly lighter for cards */
+    --surface-hover: #121421; /* hover state for cards */
+    
+    --border-light: rgba(255, 255, 255, 0.05);
+    --border-base: rgba(255, 255, 255, 0.1);
+    --border-focus: rgba(255, 255, 255, 0.2);
+
+    /* Accents */
+    --ai-primary: #00f0ff;    /* Cyan */
+    --ai-secondary: #a855f7;  /* Purple/Magenta */
+    --status-success: #00ff66; /* Green */
+    --status-danger: #ff3366;  /* Red/Coral */
+    --status-warning: #ffb800; /* Amber */
+    
+    /* Typography */
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-tertiary: #475569;
+
+    /* Spacing & Radius */
+    --radius-sm: 0.25rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    
+    /* Animation Timing */
+    --transition-fast: 150ms;
+    --transition-base: 250ms;
+    --transition-slow: 400ms;
+  }
+
+  body {
+    @apply bg-[var(--base-bg)] text-[var(--text-primary)] font-sans antialiased overflow-hidden;
+    color-scheme: dark;
+  }
+}
+
+@layer components {
+  /* Panel Styles */
+  .glass-panel {
+    @apply backdrop-blur-md shadow-xl transition-all;
+    background-color: rgba(10, 12, 22, 0.8); /* Hex #0a0c16 with 80% opacity */
+    border: 1px solid var(--border-base);
+    border-radius: var(--radius-lg);
+    transition-duration: var(--transition-base);
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--surface-hover);
+  border-radius: var(--radius-sm);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-base);
+}

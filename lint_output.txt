@@ -1,0 +1,348 @@
+﻿
+> syrus-2026@0.0.0 lint
+> oxlint
+
+
+  ! react(purity): Cannot call impure function during render
+   ,-[src/components/terminal/TopBar.tsx:6:36]
+ 5 | export function TopBar() {
+ 6 |   const [time, setTime] = useState(new Date());
+   :                                    ^^^^^|^^^^
+   :                                         `-- Cannot call impure function
+ 7 | 
+   `----
+  help: `Date` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component re-renders
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/purity
+
+  ! react(static-components): Cannot create components during render
+    ,-[src/components/terminal/copilot/ProcessingSequence.tsx:44:8]
+ 23 | 
+ 24 |   const StepItem = ({ label, index }: { label: string, index: number }) => {
+    :                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^|^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    :                                                `-- The component is created during render here
+ 25 |     const isActive = step === index;
+ 26 |     const isDone = step > index;
+ 27 |     
+ 28 |     return (
+ 29 |       <div className={`flex items-center gap-3 text-[11px] uppercase tracking-widest font-mono ${isActive ? 'text-cyan-500 animate-pulse' : isDone ? 'text-neon-green' : 'text-text-tertiary'}`}>
+ 30 |         <span className="w-4 flex justify-center">
+ 31 |           {isDone ? <Check size={12} className="text-neon-green shadow-glow-green" /> : isActive ? '...' : '-'}
+ 32 |         </span>
+ 33 |         {label}
+ 34 |       </div>
+ 35 |     );
+ 36 |   };
+ 37 | 
+ 38 |   return (
+ 39 |     <motion.div 
+ 40 |       initial={{ opacity: 0, scale: 0.95 }}
+ 41 |       animate={{ opacity: 1, scale: 1 }}
+ 42 |       className="p-4 border border-cyan-500/20 bg-cyan-900/10 backdrop-blur-sm rounded-lg flex flex-col gap-2.5 w-full max-w-[280px] shadow-glow-cyan-sm"
+ 43 |     >
+ 44 |       <StepItem label="Market Context" index={0} />
+    :        ^^^^|^^^
+    :            `-- This component is created during render
+ 45 |       <StepItem label="Intent Detection" index={1} />
+    `----
+  help: Components created during render will reset their state each time they are created. Declare components outside of render
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/static-components
+
+  ! react(static-components): Cannot create components during render
+    ,-[src/components/terminal/copilot/ProcessingSequence.tsx:45:8]
+ 23 | 
+ 24 |   const StepItem = ({ label, index }: { label: string, index: number }) => {
+    :                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^|^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    :                                                `-- The component is created during render here
+ 25 |     const isActive = step === index;
+ 26 |     const isDone = step > index;
+ 27 |     
+ 28 |     return (
+ 29 |       <div className={`flex items-center gap-3 text-[11px] uppercase tracking-widest font-mono ${isActive ? 'text-cyan-500 animate-pulse' : isDone ? 'text-neon-green' : 'text-text-tertiary'}`}>
+ 30 |         <span className="w-4 flex justify-center">
+ 31 |           {isDone ? <Check size={12} className="text-neon-green shadow-glow-green" /> : isActive ? '...' : '-'}
+ 32 |         </span>
+ 33 |         {label}
+ 34 |       </div>
+ 35 |     );
+ 36 |   };
+ 37 | 
+ 38 |   return (
+ 39 |     <motion.div 
+ 40 |       initial={{ opacity: 0, scale: 0.95 }}
+ 41 |       animate={{ opacity: 1, scale: 1 }}
+ 42 |       className="p-4 border border-cyan-500/20 bg-cyan-900/10 backdrop-blur-sm rounded-lg flex flex-col gap-2.5 w-full max-w-[280px] shadow-glow-cyan-sm"
+ 43 |     >
+ 44 |       <StepItem label="Market Context" index={0} />
+ 45 |       <StepItem label="Intent Detection" index={1} />
+    :        ^^^^|^^^
+    :            `-- This component is created during render
+ 46 |       <StepItem label="Validation" index={2} />
+    `----
+  help: Components created during render will reset their state each time they are created. Declare components outside of render
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/static-components
+
+  ! react(static-components): Cannot create components during render
+    ,-[src/components/terminal/copilot/ProcessingSequence.tsx:46:8]
+ 23 | 
+ 24 |   const StepItem = ({ label, index }: { label: string, index: number }) => {
+    :                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^|^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    :                                                `-- The component is created during render here
+ 25 |     const isActive = step === index;
+ 26 |     const isDone = step > index;
+ 27 |     
+ 28 |     return (
+ 29 |       <div className={`flex items-center gap-3 text-[11px] uppercase tracking-widest font-mono ${isActive ? 'text-cyan-500 animate-pulse' : isDone ? 'text-neon-green' : 'text-text-tertiary'}`}>
+ 30 |         <span className="w-4 flex justify-center">
+ 31 |           {isDone ? <Check size={12} className="text-neon-green shadow-glow-green" /> : isActive ? '...' : '-'}
+ 32 |         </span>
+ 33 |         {label}
+ 34 |       </div>
+ 35 |     );
+ 36 |   };
+ 37 | 
+ 38 |   return (
+ 39 |     <motion.div 
+ 40 |       initial={{ opacity: 0, scale: 0.95 }}
+ 41 |       animate={{ opacity: 1, scale: 1 }}
+ 42 |       className="p-4 border border-cyan-500/20 bg-cyan-900/10 backdrop-blur-sm rounded-lg flex flex-col gap-2.5 w-full max-w-[280px] shadow-glow-cyan-sm"
+ 43 |     >
+ 44 |       <StepItem label="Market Context" index={0} />
+ 45 |       <StepItem label="Intent Detection" index={1} />
+ 46 |       <StepItem label="Validation" index={2} />
+    :        ^^^^|^^^
+    :            `-- This component is created during render
+ 47 |       <StepItem label="Response" index={3} />
+    `----
+  help: Components created during render will reset their state each time they are created. Declare components outside of render
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/static-components
+
+  ! react(static-components): Cannot create components during render
+    ,-[src/components/terminal/copilot/ProcessingSequence.tsx:47:8]
+ 23 | 
+ 24 |   const StepItem = ({ label, index }: { label: string, index: number }) => {
+    :                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^|^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    :                                                `-- The component is created during render here
+ 25 |     const isActive = step === index;
+ 26 |     const isDone = step > index;
+ 27 |     
+ 28 |     return (
+ 29 |       <div className={`flex items-center gap-3 text-[11px] uppercase tracking-widest font-mono ${isActive ? 'text-cyan-500 animate-pulse' : isDone ? 'text-neon-green' : 'text-text-tertiary'}`}>
+ 30 |         <span className="w-4 flex justify-center">
+ 31 |           {isDone ? <Check size={12} className="text-neon-green shadow-glow-green" /> : isActive ? '...' : '-'}
+ 32 |         </span>
+ 33 |         {label}
+ 34 |       </div>
+ 35 |     );
+ 36 |   };
+ 37 | 
+ 38 |   return (
+ 39 |     <motion.div 
+ 40 |       initial={{ opacity: 0, scale: 0.95 }}
+ 41 |       animate={{ opacity: 1, scale: 1 }}
+ 42 |       className="p-4 border border-cyan-500/20 bg-cyan-900/10 backdrop-blur-sm rounded-lg flex flex-col gap-2.5 w-full max-w-[280px] shadow-glow-cyan-sm"
+ 43 |     >
+ 44 |       <StepItem label="Market Context" index={0} />
+ 45 |       <StepItem label="Intent Detection" index={1} />
+ 46 |       <StepItem label="Validation" index={2} />
+ 47 |       <StepItem label="Response" index={3} />
+    :        ^^^^|^^^
+    :            `-- This component is created during render
+ 48 |     </motion.div>
+    `----
+  help: Components created during render will reset their state each time they are created. Declare components outside of render
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/static-components
+
+  ! react(jsx-no-undef): 'OrderMonitorCard' is not defined.
+    ,-[src/components/terminal/copilot/CopilotMessage.tsx:36:10]
+ 35 |       {message.type === 'order_monitor' && (
+ 36 |         <OrderMonitorCard payload={message.payload} />
+    :          ^^^^^^^^^^^^^^^^
+ 37 |       )}
+    `----
+
+  ! react(purity): Cannot call impure function during render
+    ,-[src/components/3d/ParticleField.tsx:28:36]
+ 27 |     for (let i = 0; i < count; i++) {
+ 28 |       const r = radius * Math.cbrt(Math.random());
+    :                                    ^^^^^^|^^^^^^
+    :                                          `-- Cannot call impure function
+ 29 |       const theta = Math.random() * 2 * Math.PI;
+    `----
+  help: `Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component re-renders
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/purity
+
+  ! react(purity): Cannot call impure function during render
+    ,-[src/components/3d/ParticleField.tsx:29:21]
+ 28 |       const r = radius * Math.cbrt(Math.random());
+ 29 |       const theta = Math.random() * 2 * Math.PI;
+    :                     ^^^^^^|^^^^^^
+    :                           `-- Cannot call impure function
+ 30 |       const phi = Math.acos(2 * Math.random() - 1);
+    `----
+  help: `Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component re-renders
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/purity
+
+  ! react(purity): Cannot call impure function during render
+    ,-[src/components/3d/ParticleField.tsx:30:33]
+ 29 |       const theta = Math.random() * 2 * Math.PI;
+ 30 |       const phi = Math.acos(2 * Math.random() - 1);
+    :                                 ^^^^^^|^^^^^^
+    :                                       `-- Cannot call impure function
+ 31 |       
+    `----
+  help: `Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component re-renders
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/purity
+
+  ! react(purity): Cannot call impure function during render
+    ,-[src/components/terminal/copilot/MessageCards.tsx:11:30]
+ 10 |   const order: OrderDetails = {
+ 11 |     id: payload.id || `ORD-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
+    :                              ^^^^^^|^^^^^^
+    :                                    `-- Cannot call impure function
+ 12 |     action: payload.action,
+    `----
+  help: `Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component re-renders
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/purity
+
+  ! react(immutability): This value cannot be modified
+   ,-[src/components/3d/MarketScene.tsx:6:11]
+ 5 | function ParallaxRig({ reducedMotion }: { reducedMotion: boolean }) {
+ 6 |   const { camera } = useThree();
+   :           ^^^|^^
+   :              `-- `camera` originates here
+ 7 |   const mouse = useRef({ x: 0, y: 0 });
+   `----
+    ,-[src/components/3d/MarketScene.tsx:27:7]
+ 26 |       // Smooth interpolation
+ 27 |       camera.position.x += (targetX - camera.position.x) * 0.05;
+    :       ^^^^^^^|^^^^^^^
+    :              `-- `camera` cannot be modified
+ 28 |       camera.position.y += (targetY - camera.position.y) * 0.05;
+    `----
+  help: Modifying a value returned from a hook is not allowed. Consider moving the modification into the hook where the value is constructed
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/immutability
+
+  ! react(immutability): Cannot modify local variables after render completes
+    ,-[src/components/3d/MarketScene.tsx:27:7]
+ 19 | 
+ 20 |   useFrame(() => {
+    :            ^^^|^^^
+    :               `-- This function may (indirectly) reassign or modify `camera` after render
+ 21 |     if (!reducedMotion) {
+ 22 |       // Target camera position
+ 23 |       const targetX = mouse.current.x * 0.8;
+ 24 |       const targetY = mouse.current.y * 0.8;
+ 25 |       
+ 26 |       // Smooth interpolation
+ 27 |       camera.position.x += (targetX - camera.position.x) * 0.05;
+    :       ^^^^^^^|^^^^^^^
+    :              `-- This modifies `camera`
+ 28 |       camera.position.y += (targetY - camera.position.y) * 0.05;
+    `----
+  help: This argument is a function which may reassign or mutate `camera` after render, which can cause inconsistent behavior on subsequent renders. Consider using state instead
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/immutability
+
+  ! react(set-state-in-effect): Calling setState synchronously within an effect can trigger cascading renders
+    ,-[src/components/3d/MarketScene.tsx:54:5]
+ 50 | 
+ 51 |   useEffect(() => {
+    :   ^^^^|^^^^
+    :       `-- This is the containing effect
+ 52 |     // Check for user's motion preference
+ 53 |     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+ 54 |     setReducedMotion(mediaQuery.matches);
+    :     ^^^^^^^^|^^^^^^^
+    :             `-- Avoid calling setState() directly within an effect
+ 55 |     
+    `----
+  help: Effects should synchronize React with external systems. Calling setState synchronously inside an effect starts another render and is usually unnecessary. Derive the value during render, initialize state directly, or update it from the event that caused the change. Use an effect only when synchronizing with an external system.
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-effect
+
+  ! eslint(no-unused-vars): Catch parameter 'e' is caught but never used.
+    ,-[src/components/terminal/orders/OrderPreview.tsx:56:14]
+ 55 |       setStatus('FILLED');
+ 56 |     } catch (e) {
+    :              |
+    :              `-- 'e' is declared here
+ 57 |       setStatus('FAILED');
+    `----
+  help: Consider handling this error.
+
+  ! eslint(no-unused-vars): Variable 'isTerminal' is declared but never used. Unused variables should start with a '_'.
+     ,-[src/components/terminal/orders/OrderPreview.tsx:105:9]
+ 104 |   const isBuy = order.action === 'BUY';
+ 105 |   const isTerminal = ['FILLED', 'SUBMITTED', 'REJECTED', 'FAILED'].includes(status);
+     :         ^^^^^|^^^^
+     :              `-- 'isTerminal' is declared here
+ 106 |   const isProcessing = ['APPROVED', 'SUBMITTING'].includes(status);
+     `----
+  help: Consider removing this declaration.
+
+  ! react(purity): Cannot call impure function during render
+    ,-[src/components/3d/BackgroundScene.tsx:14:31]
+ 13 |     for (let i = 0; i < count; i++) {
+ 14 |       const r = 2 * Math.cbrt(Math.random());
+    :                               ^^^^^^|^^^^^^
+    :                                     `-- Cannot call impure function
+ 15 |       const theta = Math.random() * 2 * Math.PI;
+    `----
+  help: `Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component re-renders
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/purity
+
+  ! react(purity): Cannot call impure function during render
+    ,-[src/components/3d/BackgroundScene.tsx:15:21]
+ 14 |       const r = 2 * Math.cbrt(Math.random());
+ 15 |       const theta = Math.random() * 2 * Math.PI;
+    :                     ^^^^^^|^^^^^^
+    :                           `-- Cannot call impure function
+ 16 |       const phi = Math.acos(2 * Math.random() - 1);
+    `----
+  help: `Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component re-renders
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/purity
+
+  ! react(purity): Cannot call impure function during render
+    ,-[src/components/3d/BackgroundScene.tsx:16:33]
+ 15 |       const theta = Math.random() * 2 * Math.PI;
+ 16 |       const phi = Math.acos(2 * Math.random() - 1);
+    :                                 ^^^^^^|^^^^^^
+    :                                       `-- Cannot call impure function
+ 17 |       
+    `----
+  help: `Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component re-renders
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/purity
+
+  ! react(purity): Cannot call impure function during render
+    ,-[src/components/3d/MarketIntelligenceCore.tsx:13:21]
+ 12 |     for (let i = 0; i < 25; i++) {
+ 13 |       const theta = Math.random() * Math.PI * 2;
+    :                     ^^^^^^|^^^^^^
+    :                           `-- Cannot call impure function
+ 14 |       const phi = Math.random() * Math.PI;
+    `----
+  help: `Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component re-renders
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/purity
+
+  ! react(purity): Cannot call impure function during render
+    ,-[src/components/3d/MarketIntelligenceCore.tsx:14:19]
+ 13 |       const theta = Math.random() * Math.PI * 2;
+ 14 |       const phi = Math.random() * Math.PI;
+    :                   ^^^^^^|^^^^^^
+    :                         `-- Cannot call impure function
+ 15 |       const r1 = 0.8; // inner core
+    `----
+  help: `Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component re-renders
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/purity
+
+  ! react(purity): Cannot call impure function during render
+    ,-[src/components/3d/MarketIntelligenceCore.tsx:16:24]
+ 15 |       const r1 = 0.8; // inner core
+ 16 |       const r2 = 1.5 + Math.random() * 1.5; // outer rings
+    :                        ^^^^^^|^^^^^^
+    :                              `-- Cannot call impure function
+ 17 |       
+    `----
+  help: `Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component re-renders
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/purity
+
+Found 21 warnings and 0 errors.
+Finished in 28ms on 38 files with 116 rules using 16 threads.
