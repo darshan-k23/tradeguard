@@ -31,7 +31,7 @@ export function Sidebar({ activeTab }: SidebarProps) {
       <aside className="hidden md:flex w-16 xl:w-64 border-r border-borderLight bg-surface/30 flex-col items-center xl:items-stretch py-6 gap-8 z-20 shrink-0">
         <div className="flex items-center justify-center xl:justify-start xl:px-6 gap-3">
           <span className="w-3 h-3 rounded-full bg-cyan-500 shadow-glow-cyan animate-pulse"></span>
-          <span className="hidden xl:block font-bold text-xl tracking-widest text-text-primary">PS-04</span>
+          <span className="hidden xl:block font-bold text-xl tracking-widest text-text-primary">TRADEGUARD</span>
         </div>
 
         <nav className="flex-1 flex flex-col gap-2 xl:px-4 w-full">

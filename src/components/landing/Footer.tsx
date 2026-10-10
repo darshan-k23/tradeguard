@@ -10,7 +10,7 @@ export function Footer() {
         <div className="flex flex-col items-center md:items-start gap-2">
           <div className="flex items-center gap-3">
             <span className="w-2 h-2 rounded-full bg-cyan-500 shadow-glow-cyan animate-pulse"></span>
-            <span className="font-bold text-lg tracking-widest text-text-primary">PS-04</span>
+            <span className="font-bold text-lg tracking-widest text-text-primary">TRADEGUARD</span>
           </div>
           <span className="text-sm font-mono tracking-widest text-text-secondary">TRADEGUARD AI</span>
           <span className="text-xs text-text-tertiary">"Safe natural-language trading copilot"</span>

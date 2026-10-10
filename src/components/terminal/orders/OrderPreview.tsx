@@ -151,7 +151,7 @@ export function OrderPreview({ order, status = 'AWAITING_APPROVAL', onApprove, o
             <div className="flex items-start gap-3 bg-neon-amber/5 border border-neon-amber/10 rounded-md p-3">
               <ShieldAlert size={14} className="text-neon-amber flex-shrink-0 mt-0.5" />
               <p className="text-[10px] text-text-secondary font-sans leading-relaxed tracking-wide">
-                <span className="text-neon-amber font-medium">SECURITY LOCK:</span> Execution is locked until you approve this exact order. Sentinel AI cannot proceed autonomously.
+                <span className="text-neon-amber font-medium">SECURITY LOCK:</span> Execution is locked until you approve this exact order. TradeGuard AI cannot proceed autonomously.
               </p>
             </div>
 

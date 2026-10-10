@@ -2,7 +2,7 @@ import { useRef, useEffect, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { MarketIntelligenceCore } from './MarketIntelligenceCore';
 
-function ParallaxRig({ reducedMotion }: { reducedMotion: boolean }) {
+function ParallaxRig({ reducedMotion, stage, progress }: { reducedMotion: boolean, stage?: string, progress?: number }) {
   const { camera } = useThree();
   const mouse = useRef({ x: 0, y: 0 });
 
@@ -23,13 +23,22 @@ function ParallaxRig({ reducedMotion }: { reducedMotion: boolean }) {
       const targetX = mouse.current.x * 0.8;
       const targetY = mouse.current.y * 0.8;
       
+      // Stage-aware camera Z
+      let targetZ = 6;
+      if (stage) {
+        // Very subtle camera push over the entire cinematic section
+        targetZ = 6 - (progress || 0) * 1.5; 
+      }
+      
       // Smooth interpolation
       const currentX = camera.position.x;
       const currentY = camera.position.y;
+      const currentZ = camera.position.z;
+      
       camera.position.set(
         currentX + (targetX - currentX) * 0.05,
         currentY + (targetY - currentY) * 0.05,
-        camera.position.z
+        currentZ + (targetZ - currentZ) * 0.02
       );
       camera.lookAt(0, 0, 0);
     }
@@ -43,13 +52,19 @@ interface MarketSceneProps {
   intensity?: number;
   scale?: number;
   opacity?: number;
+  stage?: string;
+  progress?: number;
+  localProgress?: number;
 }
 
 export function MarketScene({
   className = '',
   intensity = 1,
   scale = 1,
-  opacity = 1
+  opacity = 1,
+  stage,
+  progress,
+  localProgress
 }: MarketSceneProps) {
   const [reducedMotion, setReducedMotion] = useState(() => 
     typeof window !== 'undefined' ? window.matchMedia('(prefers-reduced-motion: reduce)').matches : false
@@ -79,10 +94,12 @@ export function MarketScene({
           intensity={intensity} 
           scale={scale} 
           opacity={opacity} 
-          reducedMotion={reducedMotion} 
+          reducedMotion={reducedMotion}
+          stage={stage}
+          localProgress={localProgress}
         />
         
-        <ParallaxRig reducedMotion={reducedMotion} />
+        <ParallaxRig reducedMotion={reducedMotion} stage={stage} progress={progress} />
       </Canvas>
     </div>
   );

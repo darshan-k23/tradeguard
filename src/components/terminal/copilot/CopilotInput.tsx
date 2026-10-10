@@ -59,8 +59,8 @@ export function CopilotInput({ onSend, disabled }: CopilotInputProps) {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           disabled={disabled}
-          placeholder="Ask Sentinel anything..."
-          aria-label="Message Sentinel AI"
+          placeholder="Ask TradeGuard anything..."
+          aria-label="Message TradeGuard AI"
           className="w-full bg-background border border-borderLight rounded-xl pl-12 pr-14 py-4 text-sm text-text-primary focus:outline-none focus:border-cyan-500/50 focus-visible:ring-2 focus-visible:ring-cyan-500/50 resize-none font-sans min-h-[60px] shadow-inner transition-colors disabled:opacity-50"
           rows={1}
         />

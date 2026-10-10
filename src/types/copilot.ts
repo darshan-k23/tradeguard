@@ -1,7 +1,13 @@
-export type MessageType = 'text' | 'order_preview' | 'order_monitor' | 'metric_card' | 'stock_card' | 'system_alert';
+export type MessageType = 
+  | 'text' 
+  | 'read_only_result'
+  | 'order_preview' 
+  | 'approval_required'
+  | 'order_status'
+  | 'system_alert';
 
 export type OrderState = 
-  | 'DRAFT'
+  | 'PREPARED'
   | 'VALIDATED'
   | 'AWAITING_APPROVAL'
   | 'APPROVED'
@@ -12,9 +18,26 @@ export type OrderState =
   | 'REJECTED'
   | 'FAILED';
 
+export interface PreparedOrder {
+  id: string;
+  approvalId: string;
+  action: 'BUY' | 'SELL' | 'MODIFY' | 'CANCEL';
+  symbol: string;
+  quantity: number | string;
+  orderType: 'MARKET' | 'LIMIT' | 'SL' | 'SL-M';
+  price?: number | string; // For limit/trigger prices
+  product: 'CNC' | 'MIS' | 'NRML';
+  estimatedValue?: number;
+  status: OrderState;
+  
+  // Useful for MODIFY/CANCEL
+  targetOrderId?: string;
+  originalOrder?: Partial<PreparedOrder>;
+}
+
 export interface BaseChatMessage {
   id: string;
-  sender: 'user' | 'sentinel' | 'system';
+  sender: 'user' | 'tradeguard' | 'system';
   timestamp: Date;
 }
 
@@ -23,79 +46,51 @@ export interface TextMessage extends BaseChatMessage {
   content: string;
 }
 
-export interface OrderPreviewPayload {
-  id?: string;
-  status?: OrderState;
-  action: 'BUY' | 'SELL' | 'MODIFY' | 'CANCEL';
-  symbol: string;
-  qty: number | string;
-  orderType: 'MARKET' | 'LIMIT' | 'SL' | 'SL-M';
-  price?: number | string;
-  product?: 'CNC' | 'MIS' | 'NRML';
+export interface ReadOnlyResultMessage extends BaseChatMessage {
+  type: 'read_only_result';
+  payload: {
+    resultType: 'metric' | 'stock' | 'generic';
+    data: any;
+  };
 }
 
 export interface OrderPreviewMessage extends BaseChatMessage {
   type: 'order_preview';
-  payload: OrderPreviewPayload;
+  payload: {
+    order: PreparedOrder;
+  };
 }
 
-export interface OrderMonitorPayload {
-  id: string;
-  status: OrderState;
-  action: 'BUY' | 'SELL' | 'MODIFY' | 'CANCEL';
-  symbol: string;
-  qty: number | string;
-  orderType: 'MARKET' | 'LIMIT' | 'SL' | 'SL-M';
-  price?: number | string;
-  product?: 'CNC' | 'MIS' | 'NRML';
-  filledQty?: number;
-  avgPrice?: number;
+export interface ApprovalRequiredMessage extends BaseChatMessage {
+  type: 'approval_required';
+  payload: {
+    order: PreparedOrder;
+  };
 }
 
-export interface OrderMonitorMessage extends BaseChatMessage {
-  type: 'order_monitor';
-  payload: OrderMonitorPayload;
-}
-
-export interface MetricCardPayload {
-  label: string;
-  value: string | number;
-  trend?: 'up' | 'down' | 'neutral';
-  trendValue?: string;
-}
-
-export interface MetricCardMessage extends BaseChatMessage {
-  type: 'metric_card';
-  payload: MetricCardPayload;
-}
-
-export interface StockCardPayload {
-  symbol: string;
-  price: number;
-  change: number;
-  changePercent: number;
-}
-
-export interface StockCardMessage extends BaseChatMessage {
-  type: 'stock_card';
-  payload: StockCardPayload;
-}
-
-export interface SystemAlertPayload {
-  title: string;
-  message: string;
-  level: 'info' | 'warning' | 'error' | 'success';
+export interface OrderStatusMessage extends BaseChatMessage {
+  type: 'order_status';
+  payload: {
+    order: PreparedOrder;
+    filledQty?: number;
+    avgPrice?: number;
+    message?: string; // Reason for rejection or failure
+  };
 }
 
 export interface SystemAlertMessage extends BaseChatMessage {
   type: 'system_alert';
-  payload: SystemAlertPayload;
+  payload: {
+    title: string;
+    message: string;
+    level: 'info' | 'warning' | 'error' | 'success';
+  };
 }
 
 export type ChatMessage = 
   | TextMessage 
+  | ReadOnlyResultMessage
   | OrderPreviewMessage 
-  | OrderMonitorMessage 
-  | MetricCardMessage 
-  | StockCardMessage 
+  | ApprovalRequiredMessage
+  | OrderStatusMessage
   | SystemAlertMessage;

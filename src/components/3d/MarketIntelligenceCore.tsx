@@ -4,8 +4,9 @@ import * as THREE from 'three';
 import { OrbitRing } from './OrbitRing';
 import { ParticleField } from './ParticleField';
 
-function ConnectionLines({ opacity, reducedMotion }: { opacity: number, reducedMotion: boolean }) {
+function ConnectionLines({ opacity, reducedMotion, stage }: { opacity: number, reducedMotion: boolean, stage?: string }) {
   const ref = useRef<THREE.LineSegments>(null);
+  const materialRef = useRef<THREE.LineBasicMaterial>(null);
   
   const [lineGeometry] = useState(() => {
     const points = [];
@@ -25,14 +26,30 @@ function ConnectionLines({ opacity, reducedMotion }: { opacity: number, reducedM
 
   useFrame((_, delta) => {
     if (ref.current && !reducedMotion) {
-      ref.current.rotation.y -= delta * 0.03;
-      ref.current.rotation.z += delta * 0.01;
+      let speedMultiplier = 1;
+      let targetOpacity = 0.15;
+      
+      if (stage === 'interpret') { targetOpacity = 0.6; speedMultiplier = 1.5; }
+      else if (stage === 'validate') { targetOpacity = 0.8; speedMultiplier = 0.5; }
+      else if (stage === 'authorize') { targetOpacity = 0.3; speedMultiplier = 0.1; }
+      else if (stage === 'execute') { targetOpacity = 0.9; speedMultiplier = 4; }
+
+      ref.current.rotation.y -= delta * 0.03 * speedMultiplier;
+      ref.current.rotation.z += delta * 0.01 * speedMultiplier;
+      
+      if (materialRef.current) {
+        materialRef.current.opacity = THREE.MathUtils.lerp(
+          materialRef.current.opacity, 
+          targetOpacity * opacity, 
+          delta * 2
+        );
+      }
     }
   });
 
   return (
     <lineSegments ref={ref} geometry={lineGeometry}>
-      <lineBasicMaterial color="#00f0ff" transparent opacity={0.15 * opacity} depthWrite={false} />
+      <lineBasicMaterial ref={materialRef} color="#00f0ff" transparent opacity={0.15 * opacity} depthWrite={false} />
     </lineSegments>
   );
 }
@@ -42,34 +59,72 @@ interface MarketIntelligenceCoreProps {
   scale?: number;
   opacity?: number;
   reducedMotion?: boolean;
+  stage?: string;
+  localProgress?: number;
 }
 
 export function MarketIntelligenceCore({
   intensity = 1,
   scale = 1,
   opacity = 1,
-  reducedMotion = false
+  reducedMotion = false,
+  stage,
+  localProgress
 }: MarketIntelligenceCoreProps) {
   const coreRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
 
+  const stateRef = useRef({
+    intensity: intensity,
+    speed: 1,
+    lockScale: scale
+  });
+
   useFrame((state, delta) => {
     if (!reducedMotion) {
+      let tInt = intensity;
+      let tSpd = 1;
+      let tLock = scale;
+
+      if (stage === 'connect') { tInt = 0.5; tSpd = 0.3; }
+      else if (stage === 'understand') { tInt = 1.2; tSpd = 1.8; }
+      else if (stage === 'interpret') { tInt = 1.5; tSpd = 1.2; }
+      else if (stage === 'validate') { tInt = 1.0; tSpd = 0.4; } // structured, constrained
+      else if (stage === 'authorize') { 
+        tInt = 0.8; tSpd = 0.1; 
+        tLock = scale + (localProgress || 0) * 0.3; // focus attention / lock
+      } 
+      else if (stage === 'execute') { tInt = 2.5; tSpd = 3.0; } // directional execution
+
+      stateRef.current.intensity = THREE.MathUtils.lerp(stateRef.current.intensity, tInt, delta * 2);
+      stateRef.current.speed = THREE.MathUtils.lerp(stateRef.current.speed, tSpd, delta * 2);
+      stateRef.current.lockScale = THREE.MathUtils.lerp(stateRef.current.lockScale, tLock, delta * 2);
+
       const time = state.clock.getElapsedTime();
       
       if (coreRef.current) {
-        // Gentle pulsing effect for the core
-        const pulse = 1 + Math.sin(time * 2) * 0.03 * intensity;
+        const pulse = 1 + Math.sin(time * 2 * stateRef.current.speed) * 0.03 * stateRef.current.intensity;
         coreRef.current.scale.set(pulse, pulse, pulse);
       }
 
       if (groupRef.current) {
-        // Slow autonomous rotation
-        groupRef.current.rotation.y += delta * 0.05;
-        groupRef.current.rotation.x += delta * 0.02;
+        groupRef.current.rotation.y += delta * 0.05 * stateRef.current.speed;
+        groupRef.current.rotation.x += delta * 0.02 * stateRef.current.speed;
+        groupRef.current.scale.setScalar(stateRef.current.lockScale);
+        
+        if (stage === 'execute') {
+           // Subtle directional movement (converging)
+           groupRef.current.position.z = THREE.MathUtils.lerp(groupRef.current.position.z, 1.5, delta);
+        } else {
+           groupRef.current.position.z = THREE.MathUtils.lerp(groupRef.current.position.z, 0, delta);
+        }
       }
     }
   });
+
+  // Calculate safe particle count based on environment
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const particleCount = reducedMotion ? 50 : (isMobile ? 150 : 600);
 
   return (
     <group ref={groupRef} scale={[scale, scale, scale]}>
@@ -106,10 +161,10 @@ export function MarketIntelligenceCore({
       <OrbitRing radius={2.8} speed={0.5} rotation={[Math.PI / 6, Math.PI / 6, Math.PI / 4]} color="#00ff66" opacity={0.15 * opacity} reducedMotion={reducedMotion} />
 
       {/* Connection Lines */}
-      <ConnectionLines opacity={opacity} reducedMotion={reducedMotion} />
+      <ConnectionLines opacity={opacity} reducedMotion={reducedMotion} stage={stage} />
 
       {/* Particle Field */}
-      <ParticleField count={800} radius={3.5} color="#00f0ff" opacity={0.4 * opacity} speed={0.5} reducedMotion={reducedMotion} />
+      <ParticleField count={particleCount} radius={3.5} color="#00f0ff" opacity={0.4 * opacity} speed={0.5} reducedMotion={reducedMotion} />
     </group>
   );
 }

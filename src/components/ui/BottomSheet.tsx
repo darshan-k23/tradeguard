@@ -28,9 +28,13 @@ export function BottomSheet({ isOpen, onClose, children }: { isOpen: boolean, on
             transition={{ type: 'spring', damping: 25, stiffness: 250 }}
             className="fixed bottom-0 left-0 right-0 z-[101] bg-surface border-t border-borderLight rounded-t-3xl p-4 pb-8 md:hidden shadow-[0_-10px_50px_rgba(0,0,0,0.6)] max-h-[90vh] overflow-y-auto"
           >
-            <div className="flex justify-center mb-6 cursor-pointer py-2" onClick={onClose}>
+            <button 
+              className="flex justify-center mb-6 cursor-pointer py-2 w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 rounded-md" 
+              onClick={onClose}
+              aria-label="Close bottom sheet"
+            >
               <div className="w-12 h-1.5 bg-borderLight rounded-full" />
-            </div>
+            </button>
             {children}
           </motion.div>
         </>

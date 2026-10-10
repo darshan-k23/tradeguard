@@ -1,9 +1,8 @@
 import type { ChatMessage } from '../../../types/copilot';
 import {
   OrderPreviewCard,
-  OrderMonitorCard,
-  MetricMessageCard,
-  StockMessageCard,
+  OrderStatusCard,
+  ReadOnlyResultCard,
   SystemAlertCard
 } from './MessageCards';
 import { motion } from 'framer-motion';
@@ -24,7 +23,7 @@ export function CopilotMessage({ message, onApproveOrder, onRejectOrder }: Copil
       className={`flex flex-col gap-1.5 w-full ${isUser ? 'items-end' : 'items-start'}`}
     >
       <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-text-tertiary px-1">
-        {message.sender === 'sentinel' && <span className="text-cyan-500">SENTINEL</span>}
+        {message.sender === 'tradeguard' && <span className="text-cyan-500">TRADEGUARD</span>}
         {message.sender === 'user' && <span className="text-text-secondary">USER</span>}
         {message.sender === 'system' && <span className="text-neon-amber">SYSTEM</span>}
         <span>• {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
@@ -42,17 +41,17 @@ export function CopilotMessage({ message, onApproveOrder, onRejectOrder }: Copil
       {message.type === 'order_preview' && (
         <OrderPreviewCard payload={message.payload} onApprove={onApproveOrder} onReject={onRejectOrder} />
       )}
-
-      {message.type === 'order_monitor' && (
-        <OrderMonitorCard payload={message.payload} />
+      
+      {message.type === 'approval_required' && (
+        <OrderPreviewCard payload={message.payload} onApprove={onApproveOrder} onReject={onRejectOrder} />
       )}
 
-      {message.type === 'metric_card' && (
-        <MetricMessageCard payload={message.payload} />
+      {message.type === 'order_status' && (
+        <OrderStatusCard payload={message.payload} />
       )}
 
-      {message.type === 'stock_card' && (
-        <StockMessageCard payload={message.payload} />
+      {message.type === 'read_only_result' && (
+        <ReadOnlyResultCard payload={message.payload} />
       )}
 
       {message.type === 'system_alert' && (

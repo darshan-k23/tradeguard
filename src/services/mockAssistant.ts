@@ -1,5 +1,6 @@
 import type { ChatMessage } from '../types/copilot';
 import { marketStore } from '../store/marketStore';
+import { tradeGuardApi } from './tradeGuardApi';
 
 export async function processIntent(text: string): Promise<ChatMessage[]> {
   const lowerText = text.toLowerCase();
@@ -7,7 +8,7 @@ export async function processIntent(text: string): Promise<ChatMessage[]> {
 
   const createMsg = (type: ChatMessage['type'], content?: string, payload?: any): ChatMessage => ({
     id: Date.now().toString() + Math.random().toString(36).substring(7),
-    sender: type === 'system_alert' ? 'system' : 'sentinel',
+    sender: type === 'system_alert' ? 'system' : 'tradeguard',
     type,
     content,
     payload,
@@ -17,11 +18,14 @@ export async function processIntent(text: string): Promise<ChatMessage[]> {
   // 1. P&L Query
   if (lowerText.includes("p&l") || lowerText.includes("profit")) {
     messages.push(createMsg('text', "Here's your current Day P&L summary:"));
-    messages.push(createMsg('metric_card', undefined, {
-      label: "Day P&L",
-      value: "₹27,292.50",
-      trend: "up",
-      trendValue: "2.4%"
+    messages.push(createMsg('read_only_result', undefined, {
+      resultType: 'metric',
+      data: {
+        label: "Day P&L",
+        value: "₹27,292.50",
+        trend: "up",
+        trendValue: "2.4%"
+      }
     }));
     return messages;
   }
@@ -30,11 +34,14 @@ export async function processIntent(text: string): Promise<ChatMessage[]> {
   if (lowerText.includes("losing") || lowerText.includes("loss")) {
     const hdfc = marketStore.get("HDFCBANK");
     messages.push(createMsg('text', "These positions are currently trading below your average entry price:"));
-    messages.push(createMsg('stock_card', undefined, {
-      symbol: "HDFCBANK",
-      price: hdfc.price,
-      change: hdfc.change,
-      changePercent: hdfc.changePercent
+    messages.push(createMsg('read_only_result', undefined, {
+      resultType: 'stock',
+      data: {
+        symbol: "HDFCBANK",
+        price: hdfc.price,
+        change: hdfc.change,
+        changePercent: hdfc.changePercent
+      }
     }));
     return messages;
   }
@@ -77,23 +84,30 @@ export async function processIntent(text: string): Promise<ChatMessage[]> {
       const qty = parseInt(match[1], 10);
       const symbol = match[2].toUpperCase();
       
-      const orderId = `ORD-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-      
       const marketData = marketStore.get(symbol);
+      const orderType = lowerText.includes("limit") ? "LIMIT" : "MARKET";
 
-      messages.push(createMsg('order_preview', undefined, {
-        id: orderId,
+      // Call the mock adapter
+      const preparedOrder = await tradeGuardApi.prepareOrder({
         action,
         symbol,
-        qty,
-        orderType: 'MARKET',
-        price: marketData.price,
+        quantity: qty,
+        orderType,
+        price: orderType === 'LIMIT' ? marketData.price - 10 : undefined, // dummy limit price
         product: 'CNC'
+      });
+
+      // Once prepared, the system determines it needs approval
+      // We push a VALIDATED state message internally, then ask for approval
+      preparedOrder.status = 'VALIDATED'; // Advance state conceptually
+
+      messages.push(createMsg('approval_required', undefined, {
+        order: { ...preparedOrder, status: 'AWAITING_APPROVAL' }
       }));
     }
 
     if (found) {
-      messages.unshift(createMsg('text', "I have prepared the order previews for your review:"));
+      messages.unshift(createMsg('text', "I have prepared the order previews for your review. Please authorize to proceed."));
       return messages;
     }
   }

@@ -6,35 +6,38 @@ import { GlowButton } from '../../ui/GlowButton';
 import { ShieldAlert, Activity, AlertTriangle, Info, CheckCircle, XCircle } from 'lucide-react';
 import { MetricCard } from '../../ui/MetricCard';
 import type { 
-  OrderPreviewPayload, 
-  OrderMonitorPayload, 
-  MetricCardPayload, 
-  StockCardPayload, 
-  SystemAlertPayload 
+  OrderPreviewMessage, 
+  OrderStatusMessage, 
+  ReadOnlyResultMessage, 
+  SystemAlertMessage,
+  PreparedOrder
 } from '../../../types/copilot';
 
-export function OrderPreviewCard({ payload, onApprove, onReject }: { payload: OrderPreviewPayload, onApprove?: (id: string) => void, onReject?: (id: string) => void }) {
+function mapOrderDetails(order: PreparedOrder): OrderDetails {
+  return {
+    id: order.id,
+    action: order.action,
+    symbol: order.symbol,
+    qty: order.quantity,
+    orderType: order.orderType,
+    price: order.price,
+    product: order.product,
+    estimatedValue: order.estimatedValue,
+  };
+}
+
+export function OrderPreviewCard({ payload, onApprove, onReject }: { payload: OrderPreviewMessage['payload'], onApprove?: (id: string) => void, onReject?: (id: string) => void }) {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [orderId] = useState(() => payload.id || `ORD-${Math.random().toString(36).substr(2, 6).toUpperCase()}`);
-  const order: OrderDetails = {
-    id: orderId,
-    action: payload.action,
-    symbol: payload.symbol,
-    qty: payload.qty,
-    orderType: payload.orderType,
-    price: payload.price,
-    product: payload.product || 'CNC',
-    estimatedValue: Number(payload.qty) * (Number(payload.price) || 0), // Very rough estimate if Market order and price mock provided
+  const orderDetails = mapOrderDetails(payload.order);
+
+  const handleApprove = () => {
+    setIsSheetOpen(false);
+    if (onApprove) onApprove(payload.order.approvalId); // use approvalId
   };
 
-  const handleApprove = (id: string) => {
+  const handleReject = () => {
     setIsSheetOpen(false);
-    if (onApprove) onApprove(id);
-  };
-
-  const handleReject = (id: string) => {
-    setIsSheetOpen(false);
-    if (onReject) onReject(id);
+    if (onReject) onReject(payload.order.approvalId);
   };
 
   return (
@@ -42,86 +45,82 @@ export function OrderPreviewCard({ payload, onApprove, onReject }: { payload: Or
       <div className="md:hidden w-full pt-2">
         <GlowButton variant="secondary" className="w-full justify-between border-neon-amber/30 text-neon-amber hover:bg-neon-amber/10" onClick={() => setIsSheetOpen(true)}>
           <span className="flex items-center gap-2 tracking-widest"><ShieldAlert size={16} /> REQUIRED</span>
-          <span className="font-bold">{order.action} {order.symbol}</span>
+          <span className="font-bold">{orderDetails.action} {orderDetails.symbol}</span>
         </GlowButton>
       </div>
 
       <div className="hidden md:block w-full pt-2">
-        <OrderPreview order={order} status={payload.status || 'AWAITING_APPROVAL'} onApprove={handleApprove} onReject={handleReject} />
+        <OrderPreview order={orderDetails} status={payload.order.status} onApprove={handleApprove} onReject={handleReject} />
       </div>
 
       <BottomSheet isOpen={isSheetOpen} onClose={() => setIsSheetOpen(false)}>
-        <OrderPreview order={order} status={payload.status || 'AWAITING_APPROVAL'} onApprove={handleApprove} onReject={handleReject} />
+        <OrderPreview order={orderDetails} status={payload.order.status} onApprove={handleApprove} onReject={handleReject} />
       </BottomSheet>
     </>
   );
 }
 
-export function OrderMonitorCard({ payload }: { payload: OrderMonitorPayload }) {
+export function OrderStatusCard({ payload }: { payload: OrderStatusMessage['payload'] }) {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const order: OrderDetails = {
-    id: payload.id,
-    action: payload.action,
-    symbol: payload.symbol,
-    qty: payload.qty,
-    orderType: payload.orderType,
-    price: payload.price,
-    product: payload.product || 'CNC',
-  };
+  const orderDetails = mapOrderDetails(payload.order);
 
   return (
     <>
       <div className="md:hidden w-full pt-2">
         <GlowButton variant="secondary" className="w-full justify-between border-cyan-500/30 text-cyan-500 hover:bg-cyan-500/10" onClick={() => setIsSheetOpen(true)}>
           <span className="flex items-center gap-2 tracking-widest"><Activity size={16} /> LIVE ORDER</span>
-          <span className="font-bold text-text-primary">{order.action} {order.symbol}</span>
+          <span className="font-bold text-text-primary">{orderDetails.action} {orderDetails.symbol}</span>
         </GlowButton>
       </div>
 
       <div className="hidden md:block w-full pt-2">
-        <OrderMonitor order={order} status={payload.status} filled={payload.filledQty} avgPrice={payload.avgPrice} />
+        <OrderMonitor order={orderDetails} status={payload.order.status} filled={payload.filledQty} avgPrice={payload.avgPrice} />
       </div>
 
       <BottomSheet isOpen={isSheetOpen} onClose={() => setIsSheetOpen(false)}>
-        <OrderMonitor order={order} status={payload.status} filled={payload.filledQty} avgPrice={payload.avgPrice} />
+        <OrderMonitor order={orderDetails} status={payload.order.status} filled={payload.filledQty} avgPrice={payload.avgPrice} />
       </BottomSheet>
     </>
   );
 }
 
-export function MetricMessageCard({ payload }: { payload: MetricCardPayload }) {
-  return (
-    <div className="w-full max-w-[280px] pt-2">
-      <MetricCard 
-        label={payload.label} 
-        value={payload.value} 
-        trend={payload.trend} 
-        trendValue={payload.trendValue} 
-        className="bg-surface/80 border-borderLight shadow-sm"
-      />
-    </div>
-  );
+export function ReadOnlyResultCard({ payload }: { payload: ReadOnlyResultMessage['payload'] }) {
+  if (payload.resultType === 'metric') {
+    return (
+      <div className="w-full max-w-[280px] pt-2">
+        <MetricCard 
+          label={payload.data.label} 
+          value={payload.data.value} 
+          trend={payload.data.trend} 
+          trendValue={payload.data.trendValue} 
+          className="bg-surface/80 border-borderLight shadow-sm"
+        />
+      </div>
+    );
+  }
+
+  if (payload.resultType === 'stock') {
+    const isUp = payload.data.change >= 0;
+    return (
+      <div className="w-full max-w-[280px] p-4 bg-surface/80 border border-borderLight rounded-xl shadow-sm flex flex-col gap-2 mt-2">
+        <div className="flex justify-between items-center">
+          <span className="font-bold tracking-widest text-text-primary">{payload.data.symbol}</span>
+          <span className="font-mono text-sm">₹{payload.data.price.toLocaleString()}</span>
+        </div>
+        <div className="flex justify-between items-center text-xs font-mono">
+          <span className="text-text-tertiary">LTP</span>
+          <span className={isUp ? "text-neon-green" : "text-neon-red"}>
+            {isUp ? '+' : ''}{payload.data.change.toFixed(2)} ({Math.abs(payload.data.changePercent).toFixed(2)}%)
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
 }
 
-export function StockMessageCard({ payload }: { payload: StockCardPayload }) {
-  const isUp = payload.change >= 0;
-  return (
-    <div className="w-full max-w-[280px] p-4 bg-surface/80 border border-borderLight rounded-xl shadow-sm flex flex-col gap-2 mt-2">
-      <div className="flex justify-between items-center">
-        <span className="font-bold tracking-widest text-text-primary">{payload.symbol}</span>
-        <span className="font-mono text-sm">₹{payload.price.toLocaleString()}</span>
-      </div>
-      <div className="flex justify-between items-center text-xs font-mono">
-        <span className="text-text-tertiary">LTP</span>
-        <span className={isUp ? "text-neon-green" : "text-neon-red"}>
-          {isUp ? '+' : ''}{payload.change.toFixed(2)} ({Math.abs(payload.changePercent).toFixed(2)}%)
-        </span>
-      </div>
-    </div>
-  );
-}
-
-export function SystemAlertCard({ payload }: { payload: SystemAlertPayload }) {
+export function SystemAlertCard({ payload }: { payload: SystemAlertMessage['payload'] }) {
   const getColors = () => {
     switch(payload.level) {
       case 'error': return 'border-neon-red/30 bg-neon-red/5 text-neon-red';

@@ -1,164 +1,96 @@
 import { motion } from 'framer-motion';
-import { Pill } from '../ui/Pill';
-import { Check, Lock, ShieldCheck } from 'lucide-react';
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.5,
-    }
-  }
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, x: -20 },
-  visible: { 
-    opacity: 1, 
-    x: 0,
-    transition: { duration: 0.5, ease: "easeOut" as any }
-  }
-};
+const steps = [
+  { id: '01', title: 'USER MESSAGE', desc: '"Buy 10 TCS at market"', color: 'text-cyan-500' },
+  { id: '02', title: 'AI INTERPRETATION', desc: 'Parsing semantics and context', color: 'text-purple-500' },
+  { id: '03', title: 'STRUCTURED INTENT', desc: 'BUY TCS 10 MKT', color: 'text-text-primary' },
+  { id: '04', title: 'VALIDATION', desc: 'Deterministic constraints check', color: 'text-neon-amber' },
+  { id: '05', title: 'ORDER PREVIEW', desc: 'Locked parameters staged', color: 'text-text-secondary' },
+  { id: '06', title: 'APPROVAL', desc: 'Explicit trader signature', color: 'text-neon-green' },
+  { id: '07', title: 'EXECUTION', desc: 'Broker routing and live status', color: 'text-cyan-500' },
+];
 
 export function HowItWorksSection() {
   return (
-    <section id="how-it-works" className="relative z-30 min-h-screen py-32 px-4 md:px-12 xl:px-24 flex flex-col justify-center max-w-7xl mx-auto border-t border-borderLight/30">
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.8 }}
-        className="flex flex-col items-center text-center mb-24"
-      >
-        <Pill variant="ai" className="mb-6 border-purple-500/30 text-purple-400 bg-purple-900/10">THE PIPELINE</Pill>
-        <h2 className="text-4xl md:text-5xl lg:text-6xl font-light text-text-primary tracking-tight mb-6">
-          HOW TRADEGUARD THINKS
-        </h2>
-        <p className="text-lg text-text-secondary max-w-2xl font-light leading-relaxed">
-          Your words become a validated trade — never an uncontrolled one.
-        </p>
-      </motion.div>
+    <section id="how-it-works" className="relative z-30 min-h-screen py-32 flex flex-col justify-center bg-background border-t border-borderLight/30">
+      <div className="max-w-[1400px] mx-auto w-full px-6 md:px-12 xl:px-24">
+        
+        {/* Editorial Header */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8 }}
+          className="mb-24 flex flex-col items-center text-center"
+        >
+          <div className="text-xs font-mono text-purple-500 mb-6 tracking-widest flex items-center justify-center gap-4">
+            <span className="w-12 h-px bg-purple-500/50"></span>
+            THE PIPELINE
+            <span className="w-12 h-px bg-purple-500/50"></span>
+          </div>
+          <h2 className="text-[clamp(3rem,6vw,5rem)] font-light text-text-primary tracking-[-0.02em] leading-[1.1] max-w-4xl">
+            HOW TRADEGUARD THINKS
+          </h2>
+          <p className="mt-8 text-xl text-text-secondary max-w-2xl font-light leading-relaxed">
+            Your words become a validated trade — never an uncontrolled one. A strict, unidirectional processing pipeline guarantees safety.
+          </p>
+        </motion.div>
 
-      <motion.div 
-        variants={containerVariants}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-100px" }}
-        className="relative flex flex-col lg:flex-row gap-8 lg:gap-4 max-w-6xl mx-auto w-full"
-      >
-        {/* Connecting line for desktop */}
-        <div className="hidden lg:block absolute top-1/2 left-[10%] right-[10%] h-px bg-borderLight/30 -translate-y-1/2 z-0 overflow-hidden">
-          <motion.div 
-            initial={{ x: "-100%" }}
-            whileInView={{ x: "200%" }}
-            viewport={{ margin: "-100px" }}
-            transition={{ duration: 3, ease: "linear", repeat: Infinity }}
-            className="w-1/2 h-full bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent"
-          />
-        </div>
-        {/* Connecting line for mobile */}
-        <div className="lg:hidden absolute top-[10%] bottom-[10%] left-6 w-px bg-borderLight/30 z-0 overflow-hidden">
-          <motion.div 
-            initial={{ y: "-100%" }}
-            whileInView={{ y: "200%" }}
-            viewport={{ margin: "-100px" }}
-            transition={{ duration: 3, ease: "linear", repeat: Infinity }}
-            className="w-full h-1/2 bg-gradient-to-b from-transparent via-cyan-500/50 to-transparent"
-          />
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-6 gap-8 lg:gap-4 w-full z-10 relative">
+        {/* Pipeline Diagram */}
+        <div className="relative mt-24">
           
-          {/* STEP 1 */}
-          <motion.div variants={itemVariants} className="flex flex-col lg:items-center gap-4 group pl-12 lg:pl-0">
-            <div className="lg:hidden absolute left-4 w-4 h-4 rounded-full bg-background border-2 border-borderLight z-10 top-1.5 group-hover:border-cyan-500 transition-colors" />
-            <div className="hidden lg:flex w-8 h-8 rounded-full bg-background border-2 border-borderLight items-center justify-center text-xs font-mono text-text-tertiary group-hover:border-cyan-500 transition-colors">01</div>
-            <div className="bg-surface/40 border border-borderLight/50 p-4 rounded-sm backdrop-blur-md w-full lg:h-48 flex flex-col hover:border-cyan-500/50 transition-colors shadow-none">
-              <div className="text-[10px] font-mono text-text-tertiary tracking-widest uppercase mb-3">USER INTENT</div>
-              <div className="font-mono text-xs text-text-secondary leading-relaxed bg-background/50 p-2 rounded border border-borderLight/30">
-                <span className="text-cyan-500 animate-pulse mr-1">_</span>
-                "Buy 10 TCS at market"
-              </div>
-            </div>
-          </motion.div>
+          {/* Desktop Line */}
+          <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-px bg-borderLight/30 -translate-y-1/2" />
+          
+          {/* Mobile Line */}
+          <div className="block lg:hidden absolute left-4 top-0 bottom-0 w-px bg-borderLight/30" />
 
-          {/* STEP 2 */}
-          <motion.div variants={itemVariants} className="flex flex-col lg:items-center gap-4 group pl-12 lg:pl-0">
-             <div className="lg:hidden absolute left-4 w-4 h-4 rounded-full bg-background border-2 border-borderLight z-10 top-1.5 group-hover:border-cyan-500 transition-colors" />
-            <div className="hidden lg:flex w-8 h-8 rounded-full bg-background border-2 border-borderLight items-center justify-center text-xs font-mono text-text-tertiary group-hover:border-cyan-500 transition-colors">02</div>
-            <div className="bg-surface/40 border border-borderLight/50 p-4 rounded-sm backdrop-blur-md w-full lg:h-48 flex flex-col hover:border-cyan-500/50 transition-colors shadow-none">
-              <div className="text-[10px] font-mono text-text-tertiary tracking-widest uppercase mb-3">AI INTERPRETATION</div>
-              <div className="font-mono text-[10px] flex flex-col gap-1.5">
-                <div className="flex justify-between border-b border-borderLight/30 pb-1"><span className="text-text-tertiary">ACTION</span><span className="text-neon-green">BUY</span></div>
-                <div className="flex justify-between border-b border-borderLight/30 pb-1"><span className="text-text-tertiary">SYMBOL</span><span className="text-text-primary">TCS</span></div>
-                <div className="flex justify-between border-b border-borderLight/30 pb-1"><span className="text-text-tertiary">QTY</span><span className="text-text-primary">10</span></div>
-                <div className="flex justify-between"><span className="text-text-tertiary">TYPE</span><span className="text-text-primary">MARKET</span></div>
-              </div>
-            </div>
-          </motion.div>
+          {/* Steps */}
+          <div className="flex flex-col lg:flex-row justify-between relative z-10 gap-12 lg:gap-4">
+            {steps.map((step, i) => (
+              <motion.div 
+                key={step.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.6, delay: i * 0.1, ease: "easeOut" }}
+                className="flex flex-row lg:flex-col items-center lg:items-center gap-6 lg:gap-8 group relative lg:flex-1"
+              >
+                {/* Node */}
+                <div className="relative w-8 h-8 rounded-full bg-background border-2 border-borderLight flex items-center justify-center z-10 group-hover:border-text-primary transition-colors flex-shrink-0 lg:w-4 lg:h-4 lg:border-[3px]">
+                  {/* Subtle pulse for active feel on hover */}
+                  <div className="absolute inset-0 rounded-full bg-text-primary scale-0 group-hover:scale-50 opacity-0 group-hover:opacity-100 transition-all duration-300" />
+                </div>
 
-          {/* STEP 3 */}
-          <motion.div variants={itemVariants} className="flex flex-col lg:items-center gap-4 group pl-12 lg:pl-0">
-             <div className="lg:hidden absolute left-4 w-4 h-4 rounded-full bg-background border-2 border-borderLight z-10 top-1.5 group-hover:border-purple-500 transition-colors" />
-            <div className="hidden lg:flex w-8 h-8 rounded-full bg-background border-2 border-borderLight items-center justify-center text-xs font-mono text-text-tertiary group-hover:border-purple-500 transition-colors">03</div>
-            <div className="bg-surface/40 border border-borderLight/50 p-4 rounded-sm backdrop-blur-md w-full lg:h-48 flex flex-col hover:border-purple-500/50 transition-colors shadow-none">
-              <div className="text-[10px] font-mono text-text-tertiary tracking-widest uppercase mb-3">DETERMINISTIC VALIDATION</div>
-              <div className="font-mono text-[9px] flex flex-col gap-1.5 text-text-secondary">
-                <div className="flex items-center gap-1.5"><Check size={10} className="text-neon-green" /> Symbol valid</div>
-                <div className="flex items-center gap-1.5"><Check size={10} className="text-neon-green" /> Quantity valid</div>
-                <div className="flex items-center gap-1.5"><Check size={10} className="text-neon-green" /> Parameters valid</div>
-                <div className="flex items-center gap-1.5"><Check size={10} className="text-neon-green" /> Constraints checked</div>
-              </div>
-            </div>
-          </motion.div>
+                {/* Content */}
+                <div className="flex flex-col lg:items-center lg:text-center mt-0 lg:-mt-2 w-full">
+                  <span className={`text-[10px] font-mono tracking-widest uppercase mb-2 ${step.color}`}>
+                    {step.title}
+                  </span>
+                  <span className="text-sm text-text-secondary font-light max-w-[140px]">
+                    {step.desc}
+                  </span>
+                </div>
+              </motion.div>
+            ))}
+          </div>
 
-          {/* STEP 4 */}
-          <motion.div variants={itemVariants} className="flex flex-col lg:items-center gap-4 group pl-12 lg:pl-0">
-             <div className="lg:hidden absolute left-4 w-4 h-4 rounded-full bg-background border-2 border-borderLight z-10 top-1.5 group-hover:border-neon-amber transition-colors" />
-            <div className="hidden lg:flex w-8 h-8 rounded-full bg-background border-2 border-borderLight items-center justify-center text-xs font-mono text-text-tertiary group-hover:border-neon-amber transition-colors">04</div>
-            <div className="bg-surface/40 border border-borderLight/50 p-4 rounded-sm backdrop-blur-md w-full lg:h-48 flex flex-col hover:border-neon-amber/50 transition-colors shadow-none">
-              <div className="text-[10px] font-mono text-text-tertiary tracking-widest uppercase mb-3">EXACT ORDER PREVIEW</div>
-              <div className="bg-background rounded border border-borderLight/50 p-2 text-[10px] font-mono flex flex-col gap-1">
-                <div className="text-neon-green font-bold">BUY TCS</div>
-                <div className="text-text-secondary">10 shares MARKET</div>
-                <div className="text-neon-amber mt-2 text-[9px] flex items-center gap-1 bg-neon-amber/10 p-1 border border-neon-amber/20 rounded"><Lock size={8} /> EXECUTION LOCKED</div>
-              </div>
-            </div>
-          </motion.div>
+          {/* Animated Flow Particle (Desktop) */}
+          <motion.div 
+            className="hidden lg:block absolute top-1/2 left-0 w-16 h-px bg-cyan-500 shadow-[0_0_8px_rgba(0,240,255,0.8)] -translate-y-1/2"
+            animate={{ left: ["0%", "100%"], opacity: [0, 1, 1, 0] }}
+            transition={{ duration: 4, ease: "linear", repeat: Infinity }}
+          />
 
-          {/* STEP 5 */}
-          <motion.div variants={itemVariants} className="flex flex-col lg:items-center gap-4 group pl-12 lg:pl-0">
-             <div className="lg:hidden absolute left-4 w-4 h-4 rounded-full bg-background border-2 border-borderLight z-10 top-1.5 group-hover:border-neon-green transition-colors" />
-            <div className="hidden lg:flex w-8 h-8 rounded-full bg-background border-2 border-borderLight items-center justify-center text-xs font-mono text-text-tertiary group-hover:border-neon-green transition-colors">05</div>
-            <div className="bg-surface/40 border border-borderLight/50 p-4 rounded-sm backdrop-blur-md w-full lg:h-48 flex flex-col items-center justify-center text-center hover:border-neon-green/50 transition-colors shadow-none relative overflow-hidden group/lock">
-              <div className="absolute inset-0 bg-neon-green/0 group-hover/lock:bg-neon-green/5 transition-colors" />
-              <div className="text-[10px] font-mono text-text-tertiary tracking-widest uppercase mb-3 relative z-10">TRADER APPROVAL</div>
-              <div className="flex flex-col items-center gap-2">
-                <ShieldCheck size={20} className="text-cyan-500 shadow-glow-cyan-sm rounded-full" />
-                <span className="text-xs font-medium text-text-primary">Approval Required</span>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* STEP 6 */}
-          <motion.div variants={itemVariants} className="flex flex-col lg:items-center gap-4 group pl-12 lg:pl-0">
-             <div className="lg:hidden absolute left-4 w-4 h-4 rounded-full bg-background border-2 border-borderLight z-10 top-1.5 group-hover:border-cyan-500 transition-colors" />
-            <div className="hidden lg:flex w-8 h-8 rounded-full bg-background border-2 border-borderLight items-center justify-center text-xs font-mono text-text-tertiary group-hover:border-cyan-500 transition-colors">06</div>
-            <div className="bg-surface/40 border border-borderLight/50 p-4 rounded-sm backdrop-blur-md w-full lg:h-48 flex flex-col hover:border-cyan-500/50 transition-colors shadow-none">
-              <div className="text-[10px] font-mono text-text-tertiary tracking-widest uppercase mb-3">EXECUTION + LIVE STATUS</div>
-              <div className="font-mono text-[9px] flex flex-col gap-2 text-text-secondary relative">
-                <div className="absolute left-1 top-2 bottom-2 w-px bg-borderLight/30"></div>
-                <div className="pl-3 relative"><div className="absolute left-[-2px] top-1 w-1.5 h-1.5 rounded-full bg-text-tertiary" />APPROVED</div>
-                <div className="pl-3 relative"><div className="absolute left-[-2px] top-1 w-1.5 h-1.5 rounded-full bg-text-tertiary" />SUBMITTED</div>
-                <div className="pl-3 relative"><div className="absolute left-[-2px] top-1 w-1.5 h-1.5 rounded-full bg-text-tertiary" />PARTIALLY FILLED</div>
-                <div className="pl-3 relative"><div className="absolute left-[-2px] top-1 w-1.5 h-1.5 rounded-full bg-neon-green shadow-glow-green" /><span className="text-neon-green drop-shadow-[0_0_2px_rgba(0,255,0,0.8)]">FILLED</span></div>
-              </div>
-            </div>
-          </motion.div>
-
+          {/* Animated Flow Particle (Mobile) */}
+          <motion.div 
+            className="block lg:hidden absolute top-0 left-4 w-px h-16 bg-cyan-500 shadow-[0_0_8px_rgba(0,240,255,0.8)] -translate-x-1/2"
+            animate={{ top: ["0%", "100%"], opacity: [0, 1, 1, 0] }}
+            transition={{ duration: 4, ease: "linear", repeat: Infinity }}
+          />
         </div>
-      </motion.div>
+
+      </div>
     </section>
   );
 }

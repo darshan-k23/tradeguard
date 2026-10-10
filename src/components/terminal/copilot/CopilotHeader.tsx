@@ -6,7 +6,7 @@ export function CopilotHeader() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className="w-2.5 h-2.5 rounded-full bg-cyan-500 shadow-glow-cyan animate-pulse"></span>
-          <h2 className="text-cyan-500 font-bold tracking-widest text-lg uppercase">Sentinel AI</h2>
+          <h2 className="text-cyan-500 font-bold tracking-widest text-lg uppercase">TradeGuard AI</h2>
         </div>
         <div className="text-[10px] font-mono text-neon-green tracking-widest uppercase bg-neon-green/10 px-2 py-1 rounded border border-neon-green/20 shadow-glow-green">
           Online

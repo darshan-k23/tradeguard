@@ -8,6 +8,7 @@ import { ProductSection } from '../components/landing/ProductSection';
 import { HowItWorksSection } from '../components/landing/HowItWorksSection';
 import { SecuritySection } from '../components/landing/SecuritySection';
 import { Footer } from '../components/landing/Footer';
+import { CinematicVideoSection } from '../components/landing/cinematic/CinematicVideoSection';
 import { cn } from '../lib/utils';
 
 interface LandingPageProps {
@@ -35,29 +36,35 @@ export function LandingPage({ onEnter }: LandingPageProps) {
   const [activeSection, setActiveSection] = useState('hero');
 
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      const sections = ['hero', 'product', 'how-it-works', 'security'];
-      let current = 'hero';
-      for (const id of sections) {
-        const element = document.getElementById(id);
-        if (element && window.scrollY >= element.offsetTop - window.innerHeight / 3) {
-          current = id;
-        }
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const sections = ['hero', 'cinematic', 'product', 'how-it-works', 'security'];
+          let current = 'hero';
+          for (const id of sections) {
+            const element = document.getElementById(id);
+            if (element && window.scrollY >= element.offsetTop - window.innerHeight / 3) {
+              current = id;
+            }
+          }
+          setActiveSection(current);
+          ticking = false;
+        });
+        ticking = true;
       }
-      setActiveSection(current);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
-    // Initial check
     handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const scrollTo = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    document.getElementById(id)?.scrollIntoView();
   };
 
   return (
-    <div className="relative min-h-screen bg-background overflow-x-hidden font-sans">
+    <div className="relative min-h-screen bg-background font-sans">
       
       {/* Navigation - Fixed to top */}
       <motion.nav 
@@ -68,7 +75,7 @@ export function LandingPage({ onEnter }: LandingPageProps) {
       >
         <button onClick={() => scrollTo('hero')} className="flex items-center gap-3 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 rounded-md p-1">
           <span className="w-3 h-3 rounded-full bg-cyan-500 shadow-glow-cyan animate-pulse group-hover:bg-cyan-400 transition-colors"></span>
-          <span className="font-bold text-xl tracking-widest text-text-primary group-hover:text-white transition-colors">PS-04</span>
+          <span className="font-bold text-xl tracking-widest text-text-primary group-hover:text-white transition-colors">TRADEGUARD</span>
         </button>
         
         <div className="hidden md:flex items-center gap-8 text-xs font-mono font-medium tracking-widest text-text-secondary uppercase">
@@ -143,7 +150,7 @@ export function LandingPage({ onEnter }: LandingPageProps) {
             transition={{ delay: 1.4, duration: 1 }}
             className="absolute bottom-[20%] right-[15%] hidden lg:flex flex-col items-end gap-2"
           >
-             <Pill variant="ai" className="shadow-glow-cyan px-3 py-1">Model: PS-04-Alpha</Pill>
+             <Pill variant="ai" className="shadow-glow-cyan px-3 py-1">Model: TradeGuard-Alpha</Pill>
              <div className="font-mono text-xs text-text-tertiary">Awaiting user authorization...</div>
           </motion.div>
         </div>
@@ -176,7 +183,7 @@ export function LandingPage({ onEnter }: LandingPageProps) {
               <GlowButton variant="primary" onClick={onEnter} className="px-8 py-4 text-base tracking-widest">
                 ENTER COPILOT
               </GlowButton>
-              <GlowButton variant="secondary" onClick={() => scrollTo('how-it-works')} className="px-8 py-4 text-base tracking-widest bg-surface/50 backdrop-blur-sm hover:bg-surface transition-colors">
+              <GlowButton variant="secondary" onClick={() => scrollTo('cinematic')} className="px-8 py-4 text-base tracking-widest bg-surface/50 backdrop-blur-sm hover:bg-surface transition-colors">
                 SEE HOW IT WORKS
               </GlowButton>
             </div>
@@ -203,6 +210,9 @@ export function LandingPage({ onEnter }: LandingPageProps) {
          </motion.div>
         </div>
       </section>
+
+      {/* Cinematic Scroll-Driven Transition */}
+      <CinematicVideoSection />
 
       {/* 6. Page Content Sections */}
       <ProductSection />

@@ -3,16 +3,16 @@ import { CopilotHeader } from './CopilotHeader';
 import { CopilotMessage } from './CopilotMessage';
 import { CopilotInput } from './CopilotInput';
 import { ProcessingSequence } from './ProcessingSequence';
-import type { ChatMessage, OrderPreviewMessage, OrderState } from '../../../types/copilot';
+import type { ChatMessage, PreparedOrder } from '../../../types/copilot';
 import { processIntent } from '../../../services/mockAssistant';
-import { marketStore } from '../../../store/marketStore';
+import { tradeGuardApi } from '../../../services/tradeGuardApi';
 
 const INITIAL_MESSAGES: ChatMessage[] = [
   {
     id: '1',
     sender: 'system',
     type: 'text',
-    content: 'Sentinel AI initialized. Real-time market data synced. Awaiting trader intent...',
+    content: 'TradeGuard AI initialized. Real-time market data synced. Awaiting trader intent...',
     timestamp: new Date()
   }
 ];
@@ -70,104 +70,114 @@ export function CopilotPanel() {
     setMessages(prev => [...prev, ...responseMessages]);
   };
 
-  const updateMessagePayload = (messageId: string, updates: any) => {
+  const updateMessageOrder = (messageId: string, updatedOrder: PreparedOrder) => {
     setMessages(prev => prev.map(msg => {
-      if (msg.id === messageId && 'payload' in msg) {
-        return { ...msg, payload: { ...msg.payload, ...updates } };
+      if (msg.id === messageId && ('payload' in msg) && msg.payload && 'order' in (msg.payload as any)) {
+        return {
+          ...msg,
+          payload: {
+            ...msg.payload,
+            order: updatedOrder
+          }
+        } as ChatMessage;
       }
       return msg;
     }));
   };
 
-  const handleApproveOrder = async (orderId: string) => {
-    // Find the preview message ID so we can update its status
-    const orderPreviewMsg = messages.find(m => m.type === 'order_preview' && m.payload?.id === orderId) as OrderPreviewMessage | undefined;
-    if (!orderPreviewMsg || !orderPreviewMsg.payload) return;
-    
-    const msgId = orderPreviewMsg.id;
-    const payload = orderPreviewMsg.payload;
+  const handleApproveOrder = async (approvalId: string) => {
+    const msg = messages.find(m => 
+      (m.type === 'order_preview' || m.type === 'approval_required') && 
+      m.payload.order.approvalId === approvalId
+    );
+    if (!msg) return;
 
-    // Sequence: APPROVED -> SUBMITTING -> Monitor Created
-    updateMessagePayload(msgId, { status: 'APPROVED' });
-    await new Promise(r => setTimeout(r, 600));
-    
-    updateMessagePayload(msgId, { status: 'SUBMITTING' });
-    await new Promise(r => setTimeout(r, 1200));
-    
-    // We update the preview to SUBMITTED
-    updateMessagePayload(msgId, { status: 'SUBMITTED' });
+    try {
+      // Transition preview to SUBMITTING (Optimistic or fast UI update)
+      const approvedOrder = await tradeGuardApi.approveOrder(approvalId);
+      updateMessageOrder(msg.id, approvedOrder);
 
-    // Now spawn the monitor message
-    const monitorMsgId = Date.now().toString();
-    const monitorMsg: ChatMessage = {
-      id: monitorMsgId,
-      sender: 'system',
-      type: 'order_monitor',
-      payload: {
-        id: orderId,
-        status: 'SUBMITTED' as OrderState,
-        action: payload.action,
-        symbol: payload.symbol,
-        qty: payload.qty,
-        price: payload.price,
-        orderType: payload.orderType,
-        product: payload.product || 'CNC',
-        filledQty: 0,
-        avgPrice: 0
-      },
-      timestamp: new Date()
-    };
-    
-    setMessages(prev => [...prev, monitorMsg]);
+      // Now create an order_status message since it's approved
+      const statusMsgId = Date.now().toString();
+      const statusMsg: ChatMessage = {
+        id: statusMsgId,
+        sender: 'system',
+        type: 'order_status',
+        payload: {
+          order: approvedOrder,
+          filledQty: 0,
+          avgPrice: 0
+        },
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, statusMsg]);
 
-    // Simulate Monitor Lifecycle
-    const requestedQty = Number(payload.qty);
-    const mockPrice = Number(payload.price) || marketStore.get(payload.symbol).price;
+      // Poll the mock API to simulate backend progressing the state
+      const pollInterval = setInterval(async () => {
+        const latestOrder = await tradeGuardApi.getOrderStatus(approvedOrder.id);
+        
+        setMessages(prev => prev.map(m => {
+          if (m.id === statusMsgId && m.type === 'order_status') {
+            return {
+              ...m,
+              payload: {
+                ...m.payload,
+                order: latestOrder,
+                filledQty: latestOrder.status === 'FILLED' ? (typeof latestOrder.quantity === 'number' ? latestOrder.quantity : parseInt(latestOrder.quantity, 10)) : 0,
+                avgPrice: latestOrder.status === 'FILLED' ? (typeof latestOrder.price === 'number' ? latestOrder.price : 0) : 0
+              }
+            };
+          }
+          return m;
+        }));
 
-    setTimeout(() => {
-      updateMessagePayload(monitorMsgId, {
-        status: 'PARTIALLY_FILLED',
-        filledQty: Math.floor(requestedQty * 0.4),
-        avgPrice: mockPrice
-      });
-    }, 2500);
+        if (latestOrder.status === 'FILLED' || latestOrder.status === 'REJECTED' || latestOrder.status === 'FAILED') {
+          clearInterval(pollInterval);
+        }
+      }, 1000);
 
-    setTimeout(() => {
-      updateMessagePayload(monitorMsgId, {
-        filledQty: Math.floor(requestedQty * 0.6),
-        avgPrice: mockPrice + 0.15
-      });
-    }, 4500);
-
-    setTimeout(() => {
-      updateMessagePayload(monitorMsgId, {
-        status: 'FILLED',
-        filledQty: requestedQty,
-        avgPrice: mockPrice + 0.25
-      });
-      // Also update the preview to FILLED just so the border changes
-      updateMessagePayload(msgId, { status: 'FILLED' });
-    }, 6500);
+    } catch (err: any) {
+      const alertMsg: ChatMessage = {
+        id: Date.now().toString(),
+        sender: 'system',
+        type: 'system_alert',
+        payload: {
+          title: 'Approval Failed',
+          message: err.message || 'Failed to approve order.',
+          level: 'error'
+        },
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, alertMsg]);
+    }
   };
 
-  const handleRejectOrder = (orderId: string) => {
-    const orderPreviewMsg = messages.find(m => m.type === 'order_preview' && m.payload?.id === orderId);
-    if (orderPreviewMsg) {
-      updateMessagePayload(orderPreviewMsg.id, { status: 'REJECTED' });
-    }
+  const handleRejectOrder = async (approvalId: string) => {
+    const msg = messages.find(m => 
+      (m.type === 'order_preview' || m.type === 'approval_required') && 
+      m.payload.order.approvalId === approvalId
+    );
+    if (!msg) return;
 
-    const alertMsg: ChatMessage = {
-      id: Date.now().toString(),
-      sender: 'system',
-      type: 'system_alert',
-      payload: {
-        title: 'Order Rejected',
-        message: `Order ${orderId.toUpperCase()} was rejected by the user.`,
-        level: 'warning'
-      },
-      timestamp: new Date()
-    };
-    setMessages(prev => [...prev, alertMsg]);
+    try {
+      const rejectedOrder = await tradeGuardApi.rejectOrder(approvalId);
+      updateMessageOrder(msg.id, rejectedOrder);
+
+      const alertMsg: ChatMessage = {
+        id: Date.now().toString(),
+        sender: 'system',
+        type: 'system_alert',
+        payload: {
+          title: 'Order Rejected',
+          message: `Order ${rejectedOrder.id} was securely rejected.`,
+          level: 'warning'
+        },
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, alertMsg]);
+    } catch (err: any) {
+      console.error(err);
+    }
   };
 
   return (
